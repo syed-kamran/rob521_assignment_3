@@ -163,15 +163,18 @@ end
 % this is the core function that computes motion from two pointclouds
 function [C, r] = compute_motion( p1, p2 )
 
-    % ------insert your motion-from-two-pointclouds algorithm here------
-
+    % ------insert your motion-from-two-pointclouds algorithm here------  
+    p1_centeroid = sum(p1, 2)/size(p1, 2);
+    p2_centeroid = sum(p2, 2)/size(p2, 2);
     
-    
-    C = eye(3);     % temporary to make script run
-    r = zeros(3,1); % temporary to make script run
-   
-    
-    
+    W_ba = zeros(3, 3);
+    for i = 1:size(p1, 2)
+        W_ba = W_ba + weight*(p2(:,i)-p2_centeroid)*(p1(:,i)-p1_centeroid).';
+    end
+    W_ba = (1/weight*size(p1, 2)) * W_ba;
+    [V,~,U] = svd(W_ba);
+    C = V*[1,0,0;0,1,0;0,0,det(U)*det(V)]*U.';
+    r  = -C.'*p2_centeroid + p1_centeroid;
     % ------end of your motion-from-two-pointclouds algorithm-------
     
 end
